@@ -1,0 +1,29 @@
+
+before_script:
+  - curl -LO https://releases.rancher.com/cli/v0.6.2/rancher-linux-amd64-v0.6.2.tar.gz
+  - tar zxf rancher-linux-amd64-v0.6.2.tar.gz
+  
+build_test:
+  script:
+    - docker build -t dockerimages.fhcrc.org/bnabpkpd:latest .
+    - |
+        if docker ps -a|tr -s ' '|rev|cut -d ' ' -f 1|rev|grep -q bnabpkpd
+        then
+        docker stop bnabpkpd && docker rm --force bnabpkpd
+        fi
+    - docker run -d --name bnabpkpd -p 8888:8888 dockerimages.fhcrc.org/bnabpkpd:latest
+    - sleep 15 && curl -u $TESTUSER:TESTPASS -sI  http://localhost:8888  |head -1|grep -q "200 OK"
+    - docker stop bnabpkpd && docker rm --force bnabpkpd
+  
+  
+deploy:
+  stage: deploy
+  only:
+    refs:
+       - master
+  script:
+    - docker login --username $DOCKERIMAGES_USER --password $DOCKERIMAGES_PASS https://dockerimages.fhcrc.org
+    - docker push dockerimages.fhcrc.org/bnabpkpd:latest
+    - sleep 15
+    - rancher-v0.6.2/rancher --url https://ponderosa.fhcrc.org --access-key $RANCHERAPI_KEY --secret-key $RANCHERAPI_SECRET up -d --pull --force-upgrade --confirm-upgrade --stack bnabpkpd --file docker-compose.yml --rancher-file rancher-compose.yml
+  
