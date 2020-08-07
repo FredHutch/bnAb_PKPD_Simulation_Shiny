@@ -1,0 +1,9 @@
+version: '2'
+services:
+  bnabpkpd:
+    image: dockerimages.fhcrc.org/bnabpkpd:latest
+
+    labels:
+      io.rancher.container.pull_image: always
+
+    restart: always
