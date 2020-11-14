@@ -26,7 +26,7 @@ make_pkpd_dat = function(pkdat, pddat, endpoint_set, interaction_set, thresh = -
         )
       )),
       neut_res = map(ID50_dat, simple_IIP_interactions),
-      neut_summary = map(neut_res, summarize_all, list(mean = mean, coverage = ~mean(.x > thresh)))
+      neut_summary = map(neut_res, summarize_all, list(mean = mean, coverage = ~100 * mean(.x > thresh)))
     ) %>%
     select(-data, -ID50_dat, -neut_res) %>% 
     unnest(neut_summary) %>%

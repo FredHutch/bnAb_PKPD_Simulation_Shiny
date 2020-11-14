@@ -20,6 +20,7 @@ shinyServer(function(input, output) {
               mtime = reactive({
                 c(0.1, 0.5, 1, seq(2, input$finaltime, by = 1))
               })
+              text_size = 16
               #mtime = times()
 
               ratio_txt = reactive({
@@ -28,10 +29,13 @@ shinyServer(function(input, output) {
                 ratio_txt = case_when(
                   oddsB == 0 ~ "mAbA only",
                   oddsA == 0 ~ "mAbB only",
-                  oddsA > 0 & oddsA < 1 ~ paste0("dose ratio 1:", oddsB, "(mAbA:mAbB)"),
-                  TRUE ~ paste0("dose ratio ", oddsA, ":1 (mAbA:mAbB)")
+                  oddsA > 0 & oddsA < 1 ~ paste0("1:", oddsB, "(mAbA:mAbB)"),
+                  TRUE ~ paste0(oddsA, ":1 (mAbA:mAbB)")
                 )
               })
+              
+              
+              output$ratio_print = renderText({ratio_txt()})
 
               coverage_opt = reactive({
                 thresh = if(input$threshout) input$threshold else -1
@@ -51,7 +55,7 @@ shinyServer(function(input, output) {
                 set.seed(input$seed)
                 tibble(
                   mabA = ifelse(1 - rbinom(input$sim_n, 1, input$phiA), rnorm(input$sim_n, input$muA, input$sdA), 4),
-                  mabA2 = 10^ifelse(mabA ==4, Inf, mabA),
+                  mabA2 = 10^ifelse(mabA == 4, Inf, mabA),
                   mabB = ifelse(1 - rbinom(input$sim_n, 1, input$phiB), rnorm(input$sim_n, input$muB, input$sdB), 4),
                   mabB2 = 10^ifelse(mabB == 4, Inf, mabB)
                 )
@@ -66,8 +70,8 @@ shinyServer(function(input, output) {
                               interaction_set = input$interaction, thresh = coverage_opt())
               })
 
-              optRatio = eventReactive(input$run_optim, {
-                map_df(seq(0, 1, by = 0.1), function(i) {
+              optRatio_tmp = eventReactive(input$run_optim, {
+                map_df(seq(0, 1, by = 0.05), function(i) {
                   pk_dat = tibble(
                     days = mtime(),
                     mAbA = one_cmpt_pk(mtime(), input$dose * i, input$VA, input$hlA),
@@ -82,27 +86,37 @@ shinyServer(function(input, output) {
                 }) %>%
                   mutate(optim_value = max(value),
                          optimal_ratio = (value == optim_value),
-                         user_ratio = ratio == input$ratio) %>%
+                         user_ratio = abs(ratio - input$ratio) < 1e-3) %>%
                   ungroup()
               })
+              optRatio = reactive({
+                if(!is.null(optRatio_tmp())) {
+                  optRatio_tmp() %>% mutate(user_ratio = abs(ratio - input$ratio) < 1e-3)
+                } else optRatio_tmp()
+              })
+              
+              # optRatio = observeEvent(input$dose, {
+              #   if(exists('optRatio()')) optRatio() %>% mutate(user_ratio = ratio == input$ratio)
+              # })
 
               output$PKplot <- renderPlot({
 
                 PKDat() %>%
                   tidyr::gather(mAb, concentration, mAbA, mAbB) %>%
                   ggplot(aes(x = days, y = concentration, color = mAb)) +
-                  geom_line() +
-                  ggtitle(ratio_txt())
-
+                  geom_line(size = 1.5) +
+                  theme(text = element_text(size = text_size),
+                        legend.position = c(0.95, 0.9), legend.justification = "right")
               })
 
               output$PDplot  <- renderPlot({
 
-                (ggplot(PDdat_react(), aes(x = mabA, y = mabB)) +
+                (ggplot(PDdat_react(), aes(x = 10^mabA, y = 10^mabB)) +
                    geom_point(alpha = 0.5) +
-                   scale_x_continuous("Log10 IC50A", limits = PDlims_react()) +
-                   scale_y_continuous("Log10 IC50B", limits = PDlims_react()) +
-                   geom_abline())  %>%
+                   scale_x_log10("IC50A", limits = 10^PDlims_react()) +
+                   scale_y_log10("IC50B", limits = 10^PDlims_react()) +
+                   geom_abline() +
+                   theme(text = element_text(size = text_size)))  %>%
                   ggExtra::ggMarginal(type = "histogram")
               })
 
@@ -113,36 +127,61 @@ shinyServer(function(input, output) {
 
               output$PKPDpl  <- renderPlot({
                 if(unique(PKPDdat()$summary) == "mean") ylab = paste("mean", input$endpoint)
-                if(unique(PKPDdat()$summary) == "coverage") ylab = paste(input$endpoint, ">", input$threshold)
+                if(unique(PKPDdat()$summary) == "coverage") ylab = paste(input$endpoint, ">", input$threshold,
+                                                                         "(% viruses)")
 
                 PKPDdat() %>%
-                  ggplot(aes(x = days, y = value, color = interaction)) +
-                  geom_line(size=0.75) +
-                  scale_color_viridis_d() +
+                  mutate(
+                    interaction_lab = factor(interaction, levels = c("BH", "additivity", "maxNeut", "minNeut"),
+                                             labels =  c("BH", "additivity", "maximum", "minimum"))
+                  ) %>%
+                  ggplot(aes(x = days, y = value, color = interaction_lab)) +
+                  geom_line(size=1.5) +
+                  scale_color_viridis_d("") +
                   scale_y_continuous(ylab) +
-                  ggtitle(ratio_txt())
+                  theme(text = element_text(size = text_size))
 
               })
 
               ylab_opt = eventReactive(input$run_optim, {
                 if(unique(optRatio()$summary) == "mean") x = paste("mean", input$endpoint)
-                if(unique(optRatio()$summary) == "coverage") x = paste(input$endpoint, ">", input$threshold)
+                if(unique(optRatio()$summary) == "coverage") x = paste(input$endpoint, ">", input$threshold,
+                                                                       "(% viruses)")
                 x
               })
 
               output$optratio  <- renderPlot({
                 optratio_pt = optRatio() %>%
                   gather(ratio_selection, selection, optimal_ratio, user_ratio) %>%
-                  filter(selection)
+                  mutate(ratio_selection = gsub("_ratio", "", ratio_selection)) %>%
+                  filter(selection) %>%
+                  mutate(
+                    interaction_lab = factor(interaction, levels = c("BH", "additivity", "maxNeut", "minNeut"),
+                                             labels =  c("BH", "additivity", "maximum", "minimum"))
+                  ) 
 
                 optRatio() %>%
-                  ggplot(aes(x = ratio, y = value, color = interaction, linetype = pk_summary)) +
+                  mutate(
+                    interaction_lab = factor(interaction, levels = c("BH", "additivity", "maxNeut", "minNeut"),
+                                             labels =  c("BH", "additivity", "maximum", "minimum"))
+                  ) %>%
+                  ggplot(aes(x = ratio, y = value, color = interaction_lab)) +
                   geom_line() +
                   geom_point(data = optratio_pt, size = 4, aes(shape = ratio_selection)) +
-                  scale_color_viridis_d(guide = F) +
-                  scale_shape_manual(values = c(16, 4)) +
+                  scale_color_viridis_d("") +
+                  scale_shape_manual("ratio", values = c(16, 4)) +
                   scale_y_continuous(ylab_opt()) +
-                  facet_wrap(~interaction)
+                  scale_x_continuous("ratio: mAbA / total dose", 
+                                     breaks = 0:4/4,
+                                     labels = c("All\nmAbB", 
+                                                0.25, 0.5, 0.75,
+                                                "All\nmAbA")) +
+                  facet_grid(rows = vars(pk_summary), scales="free_y", switch = "y") +
+                  theme(strip.placement = "outside", strip.background = element_blank(),
+                        legend.box = "vertical",
+                        panel.spacing.x = unit(1, "lines"),
+                        strip.switch.pad.grid = unit(0, "lines"),
+                        text = element_text(size = text_size))
 
               })
             }

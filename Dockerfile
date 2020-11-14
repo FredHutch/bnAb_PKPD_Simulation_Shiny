@@ -9,7 +9,7 @@ RUN rm -rf /srv/shiny-server/
 ADD ./app/*.R /srv/shiny-server/
 
 ADD system/. /home/shiny/system/
-RUN R -e "install.packages('pracma')"
+RUN R -e "install.packages(c('pracma', 'shinycssloaders'), repos = 'http://cran.us.r-project.org')"
 
 # ADD app/. /home/shiny/
 # RUN chown -R shiny:shiny /home/shiny 
