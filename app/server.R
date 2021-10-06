@@ -178,7 +178,7 @@ shinyServer(function(input, output) {
                                                 "All\nmAbA")) +
                   facet_grid(rows = vars(pk_summary), scales="free_y", switch = "y") +
                   theme(strip.placement = "outside", strip.background = element_blank(),
-                        legend.box = "vertical",
+                        legend.box = "vertical", legend.position = "right",
                         panel.spacing.x = unit(1, "lines"),
                         strip.switch.pad.grid = unit(0, "lines"),
                         text = element_text(size = text_size))

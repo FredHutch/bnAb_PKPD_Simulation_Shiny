@@ -73,7 +73,7 @@ shinyUI(fluidPage(
            mainPanel(
              tabsetPanel(
                tabPanel("PKPD over time", plotOutput("PKPDpl")),
-               tabPanel("Optimized PKPD", withSpinner(plotOutput("optratio"), 
+               tabPanel("Optimized PKPD", withSpinner(plotOutput("optratio", height = "600", width = "600"), 
                                                       type = 8, color = "#3D85B8", hide.ui = FALSE, 
                                                       size = 2.5))
              )                             
