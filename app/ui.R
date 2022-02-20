@@ -22,6 +22,17 @@ shinyUI(fluidPage(
                       fluidRow(
                         column(5, numericInput("VA", "VA", min = 0, max = 20, value = 3, step = 0.25)),
                         column(5, numericInput("VB", "VB", min = 0, max = 20, value = 3, step = 0.25))
+                      )),
+             fluidRow(column(10, strong("Absorption (SC/IM admin)")), align = "center",
+                      fluidRow(
+                        column(5, checkboxInput("SC_A", "A", value = FALSE)),
+                        column(5, checkboxInput("SC_B", "B", value = FALSE)),
+                        column(5, numericInput("kaA", "kaA", min = 0, value = 0.4, step = 0.025)),
+                        column(5, numericInput("kaB", "kaB", min = 0, value = 0.4, step = 0.025)),
+                        column(5, numericInput("FbioA", "Bioavail. A", min = 0, max = 1,
+                                               value = 0.7, step = 0.025)),
+                        column(5, numericInput("FbioB", "Bioavail. B", min = 0, max = 1,
+                                               value = 0.7, step = 0.025))
                       ))
            ),
            mainPanel(plotOutput("PKplot"))

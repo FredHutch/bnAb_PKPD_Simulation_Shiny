@@ -42,12 +42,18 @@ shinyServer(function(input, output) {
                 thresh
               })
 
-
               PKDat = reactive({
                 tibble(
                   days = mtime(),
-                  mAbA = one_cmpt_pk(mtime(), input$dose * input$ratio, input$VA, input$hlA),
-                  mAbB = one_cmpt_pk(mtime(), input$dose * (1 - input$ratio), input$VB, input$hlB)
+                  mAbA = if(T) {
+                      one_cmpt_pk(mtime(), input$dose * input$ratio, input$VA*10, input$hlA,
+                                SC = input$SC_A, ka = input$kaA, Fbio = input$FbioA)
+                    } else{
+                      one_cmpt_pk(mtime(), input$dose * input$ratio, input$VA, input$hlA,
+                                     SC = input$SC_A, ka = input$kaA, Fbio = input$FbioA)
+                      },
+                  mAbB = one_cmpt_pk(mtime(), input$dose * (1 - input$ratio), input$VB, input$hlB,
+                                     SC = input$SC_B, ka = input$kaB, Fbio = input$FbioB)
                 )
               })
 
