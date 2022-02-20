@@ -33,6 +33,17 @@ shinyUI(fluidPage(
                                                value = 0.7, step = 0.025)),
                         column(5, numericInput("FbioB", "Bioavail. B", min = 0, max = 1,
                                                value = 0.7, step = 0.025))
+                      )),
+             fluidRow(column(10, strong("Two-compartment")), align = "center",
+                      fluidRow(
+                        column(5, checkboxInput("A_twocmpt", "A", value = FALSE)),
+                        column(5, checkboxInput("B_twocmpt", "B", value = FALSE)),
+                        column(5, numericInput("QA", "QA", min = 0.01, value = 0.75, step = 0.025)),
+                        column(5, numericInput("QB", "QB", min = 0.01, value = 0.75, step = 0.025)),
+                        column(5, numericInput("VpA", "VpA", min = 0.01, max = 20, 
+                                               value = 2, step = 0.25)),
+                        column(5, numericInput("VpB", "VpB", min = 0.01, max = 20, 
+                                               value = 2, step = 0.25))
                       ))
            ),
            mainPanel(plotOutput("PKplot"))

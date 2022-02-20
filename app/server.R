@@ -34,6 +34,14 @@ shinyServer(function(input, output) {
                 )
               })
               
+              ClA = reactive({
+                if(input$A_twocmpt) calc_CL(V = input$VA, Q = input$QA, 
+                                            Vp = input$VpA, hl = input$hlA) else 1
+              })
+              ClB = reactive({
+                if(input$B_twocmpt) calc_CL(V = input$VB, Q = input$QB, 
+                                            Vp = input$VpB, hl = input$hlB) else 1
+              })
               
               output$ratio_print = renderText({ratio_txt()})
 
@@ -45,15 +53,22 @@ shinyServer(function(input, output) {
               PKDat = reactive({
                 tibble(
                   days = mtime(),
-                  mAbA = if(T) {
-                      one_cmpt_pk(mtime(), input$dose * input$ratio, input$VA*10, input$hlA,
+                  mAbA = if(input$A_twocmpt) {
+                      two_cmpt_pk(mtime(), input$dose * input$ratio, 
+                                V =  input$VA, Cl =  ClA(), Q = input$QA, Vp = input$VpA,
                                 SC = input$SC_A, ka = input$kaA, Fbio = input$FbioA)
                     } else{
                       one_cmpt_pk(mtime(), input$dose * input$ratio, input$VA, input$hlA,
                                      SC = input$SC_A, ka = input$kaA, Fbio = input$FbioA)
                       },
-                  mAbB = one_cmpt_pk(mtime(), input$dose * (1 - input$ratio), input$VB, input$hlB,
+                  mAbB = if(input$B_twocmpt) {
+                    two_cmpt_pk(mtime(), input$dose * (1 - input$ratio), 
+                                V =  input$VB, Cl =  ClB(), Q = input$QB, Vp = input$VpB,
+                                SC = input$SC_B, ka = input$kaB, Fbio = input$FbioB)
+                    } else{
+                    one_cmpt_pk(mtime(), input$dose * (1 - input$ratio), input$VB, input$hlB,
                                      SC = input$SC_B, ka = input$kaB, Fbio = input$FbioB)
+                  }
                 )
               })
 
