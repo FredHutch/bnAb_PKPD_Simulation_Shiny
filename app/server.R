@@ -11,6 +11,7 @@ library(ggplot2)
 source("pk_fun.R")
 source("processing_fun.R")
 source("pkpd_fun.R")
+source("example_parms.R")
 
 
 # Define server logic required
@@ -36,14 +37,36 @@ shinyServer(function(input, output) {
               
               ClA = reactive({
                 if(input$A_twocmpt) calc_CL(V = input$VA, Q = input$QA, 
-                                            Vp = input$VpA, hl = input$hlA) else 1
+                                            Vp = input$VpA, hl = input$hlA) else input$VA*log(2)/input$hlA
               })
               ClB = reactive({
                 if(input$B_twocmpt) calc_CL(V = input$VB, Q = input$QB, 
-                                            Vp = input$VpB, hl = input$hlB) else 1
+                                            Vp = input$VpB, hl = input$hlB) else input$VB*log(2)/input$hlB
               })
               
               output$ratio_print = renderText({ratio_txt()})
+              
+              output$pk_tab = renderTable({
+                 QA = if(input$A_twocmpt) input$QA else NA
+                 VpA = if(input$A_twocmpt) input$VpA else NA
+                 QB = if(input$B_twocmpt) input$QB else NA
+                 VpB = if(input$B_twocmpt) input$VpB else NA                
+                 kaA = if(input$SC_A)  input$kaA else NA
+                 FbioA = if(input$SC_A)  input$FbioA else NA
+                 kaB = if(input$SC_B)  input$kaB else NA
+                 FbioB = if(input$SC_B)  input$FbioB else NA
+
+                tribble(
+                  ~bNAb, ~`Dose (mg)`, ~`Elim. HL (days)`, ~V, ~Cl, ~ka, ~Bioavailability, ~Q, ~Vp,
+                  "mAb A", input$dose*input$ratio, input$hlA, input$VA, round(ClA(), 3), kaA, FbioA, QA, VpA, 
+                  "mAb B", input$dose*(1-input$ratio), input$hlB, input$VB, round(ClB(), 3), kaB, FbioB, QB, VpB
+                  ) %>%
+                  mutate_all(as.character) %>%
+                  replace(is.na(.), "")
+                
+              })
+              
+              output$pk_ex_tab = renderTable(pk_lit) #sourced in from example_parms.R
 
               coverage_opt = reactive({
                 thresh = if(input$threshout) input$threshold else -1
@@ -122,12 +145,17 @@ shinyServer(function(input, output) {
 
               output$PKplot <- renderPlot({
 
-                PKDat() %>%
+                pk_pl = PKDat() %>%
                   tidyr::gather(mAb, concentration, mAbA, mAbB) %>%
                   ggplot(aes(x = days, y = concentration, color = mAb)) +
                   geom_line(size = 1.5) +
                   theme(text = element_text(size = text_size),
                         legend.position = c(0.95, 0.9), legend.justification = "right")
+                
+                if(input$log_time) pk_pl = pk_pl + scale_x_log10()
+                if(input$log_conc) pk_pl = pk_pl + scale_y_log10()
+                
+                pk_pl
               })
 
               output$PDplot  <- renderPlot({

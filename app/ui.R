@@ -14,39 +14,48 @@ shinyUI(fluidPage(
   tabPanel("PK",
          sidebarLayout(
            sidebarPanel(
-             numericInput("dose", "total dose (mg)", value = 300, min = 100, max = 3000, step = 50),
+             numericInput("dose", "total dose (mg) (ex., 30 mg/kg x 70 kg = 2100 mg)", value = 300, min = 100, max = 3000, step = 50),
              numericInput("finaltime", "time (days)", min = 0, value = 75),
              sliderInput("hlA", "mAb A HL (days):", min = 5, max = 100, step = 5, value = 30),
              sliderInput("hlB", "mAb B HL (days):", min = 5, max = 100, step = 5, value = 15),
              fluidRow(column(10, strong("distribution volume (L)")), align = "center",
                       fluidRow(
-                        column(5, numericInput("VA", "VA", min = 0, max = 20, value = 3, step = 0.25)),
-                        column(5, numericInput("VB", "VB", min = 0, max = 20, value = 3, step = 0.25))
+                        column(5, numericInput("VA", p(HTML(paste0("V",tags$sub("A")))), min = 0, max = 20, value = 3, step = 0.25)),
+                        column(5, numericInput("VB", p(HTML(paste0("V",tags$sub("B")))), min = 0, max = 20, value = 3, step = 0.25))
                       )),
-             fluidRow(column(10, strong("Absorption (SC/IM admin)")), align = "center",
+             hr(style = "border-top: 1px solid #000000;"),
+             fluidRow(column(10, strong("absorption model (ex., SC/IM admin)")), align = "center",
                       fluidRow(
-                        column(5, checkboxInput("SC_A", "A", value = FALSE)),
-                        column(5, checkboxInput("SC_B", "B", value = FALSE)),
-                        column(5, numericInput("kaA", "kaA", min = 0, value = 0.4, step = 0.025)),
-                        column(5, numericInput("kaB", "kaB", min = 0, value = 0.4, step = 0.025)),
-                        column(5, numericInput("FbioA", "Bioavail. A", min = 0, max = 1,
+                        column(5, checkboxInput("SC_A", "mAb A", value = FALSE)),
+                        column(5, checkboxInput("SC_B", "mAb B", value = FALSE)),
+                        column(5, numericInput("kaA", p(HTML(paste0("ka",tags$sub("A")))), min = 0, value = 0.4, step = 0.025)),
+                        column(5, numericInput("kaB", p(HTML(paste0("ka",tags$sub("B")))), min = 0, value = 0.4, step = 0.025)),
+                        column(5, numericInput("FbioA", "mAb A Bioavail.", min = 0, max = 1,
                                                value = 0.7, step = 0.025)),
-                        column(5, numericInput("FbioB", "Bioavail. B", min = 0, max = 1,
+                        column(5, numericInput("FbioB", "mAb B Bioavail.", min = 0, max = 1,
                                                value = 0.7, step = 0.025))
                       )),
-             fluidRow(column(10, strong("Two-compartment")), align = "center",
+             hr(style = "border-top: 1px solid #000000;"),
+             fluidRow(column(10, strong("two-compartment model")), align = "center",
                       fluidRow(
-                        column(5, checkboxInput("A_twocmpt", "A", value = FALSE)),
-                        column(5, checkboxInput("B_twocmpt", "B", value = FALSE)),
-                        column(5, numericInput("QA", "QA", min = 0.01, value = 0.75, step = 0.025)),
-                        column(5, numericInput("QB", "QB", min = 0.01, value = 0.75, step = 0.025)),
-                        column(5, numericInput("VpA", "VpA", min = 0.01, max = 20, 
+                        column(5, checkboxInput("A_twocmpt", "mAb A", value = FALSE)),
+                        column(5, checkboxInput("B_twocmpt", "mAb B", value = FALSE)),
+                        column(5, numericInput("QA", p(HTML(paste0("Q",tags$sub("A")))), min = 0.01, value = 0.75, step = 0.025)),
+                        column(5, numericInput("QB", p(HTML(paste0("Q",tags$sub("B")))), min = 0.01, value = 0.75, step = 0.025)),
+                        column(5, numericInput("VpA", p(HTML(paste0("Vp",tags$sub("A")))), min = 0.01, max = 20, 
                                                value = 2, step = 0.25)),
-                        column(5, numericInput("VpB", "VpB", min = 0.01, max = 20, 
+                        column(5, numericInput("VpB", p(HTML(paste0("Vp",tags$sub("B")))), min = 0.01, max = 20, 
                                                value = 2, step = 0.25))
-                      ))
+                      )),
+             hr(style = "border-top: 1px solid #000000;"),
+             fluidRow(column(10, checkboxInput("log_time", "Log x-axis (time)", value = FALSE)),
+                      column(10, checkboxInput("log_conc", "Log y-axis (concentration)", value = FALSE)))
            ),
-           mainPanel(plotOutput("PKplot"))
+           mainPanel(
+             tabsetPanel(
+               tabPanel("Simulated PK", plotOutput("PKplot"), tableOutput("pk_tab")),
+               tabPanel("Example PK input", tableOutput("pk_ex_tab"), h6("Note: These are simplified un-adjusted parameters from these references. Inter-subject variation and covariate-adjustment (e.g., weight) should be assessed carefully in design."))
+             ))
          )
   ),
   tabPanel("PD",
