@@ -1,0 +1,13 @@
+bNAb,Mean log10 IC50,Std. Dev. log10 IC50,Resistant (pct),Clade,Ref
+VRC01,0.5,0.5,50,Multiple (breakthrough),"Corey et al. (NEJM, 2021)"
+10E8.4/iMab,-3,0.5,2.5,Tier 2 pseudovirus panel,"Huang et al. (Cell, 2017)"
+PGT121,-1.6,1,35,A1,CATNAP Database
+3BNC117,-1.4,0.7,5,A1,CATNAP Database
+PGT121,-1.3,1,30,C,CATNAP Database
+3BNC117,-0.75,0.7,25,C,CATNAP Database
+10-1074,-1.4,0.9,35,C,CATNAP Database
+VRC07-523LS,-1.2,0.7,5,C,CATNAP Database
+VRC07-523LS,0.05,0.6,5,C (isolates),"Lorenzi et al. (Virology, 2021)"
+CAP256-VRC25.26,-2.7,2.25,50,C (isolates),"Lorenzi et al. (Virology, 2021)"
+PDGM1400,-0.25,1.2,50,C (isolates),"Lorenzi et al. (Virology, 2021)"
+PGDM1400,-1.7,1.1,25,C,CATNAP Database

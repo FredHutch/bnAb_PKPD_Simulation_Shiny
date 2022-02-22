@@ -1,5 +1,5 @@
 
-titer2neut = function(id50) 1 - 1/(1+id50)
+titer2neut = function(id50, hill = 1) 1 - 1/(1+(id50^hill))
 
 simple_IIP_interactions = function(dat) {
   dat %>%

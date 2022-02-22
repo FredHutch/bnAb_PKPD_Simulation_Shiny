@@ -11,8 +11,7 @@ library(ggplot2)
 source("pk_fun.R")
 source("processing_fun.R")
 source("pkpd_fun.R")
-source("example_parms.R")
-
+source("load_example_parms.R")
 
 # Define server logic required
 
@@ -45,6 +44,9 @@ shinyServer(function(input, output) {
               })
               
               output$ratio_print = renderText({ratio_txt()})
+              output$titer_iip = renderTable({tibble(`Predicted ID80` = input$ID50 * 4^(1/input$hill), 
+                                                     `IIP Threshold`= -log10(1 - titer2neut(input$ID50, 
+                                                                                            hill = input$hill)))})
               
               output$pk_tab = renderTable({
                  QA = if(input$A_twocmpt) input$QA else NA
@@ -66,8 +68,9 @@ shinyServer(function(input, output) {
                 
               })
               
-              output$pk_ex_tab = renderTable(pk_lit) #sourced in from example_parms.R
-
+              output$pk_ex_tab = renderTable(pk_ex_tab)
+              output$pd_ex_tab = renderTable(pd_ex_tab[1:10, ])
+              
               coverage_opt = reactive({
                 thresh = if(input$threshout) input$threshold else -1
                 thresh
@@ -98,9 +101,11 @@ shinyServer(function(input, output) {
               PDdat_react = reactive({
                 set.seed(input$seed)
                 tibble(
-                  mabA = ifelse(1 - rbinom(input$sim_n, 1, input$phiA), rnorm(input$sim_n, input$muA, input$sdA), 4),
-                  mabA2 = 10^ifelse(mabA == 4, Inf, mabA),
-                  mabB = ifelse(1 - rbinom(input$sim_n, 1, input$phiB), rnorm(input$sim_n, input$muB, input$sdB), 4),
+                  mabA = ifelse(1 - rbinom(input$sim_n, 1, input$phiA), 
+                                rnorm(input$sim_n, input$muA, input$sdA), 4), #log10 scale
+                  mabA2 = 10^ifelse(mabA == 4, Inf, mabA), 
+                  mabB = ifelse(1 - rbinom(input$sim_n, 1, input$phiB), 
+                                rnorm(input$sim_n, input$muB, input$sdB), 4), #log10 scale
                   mabB2 = 10^ifelse(mabB == 4, Inf, mabB)
                 )
               })

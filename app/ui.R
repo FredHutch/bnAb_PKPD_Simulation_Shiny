@@ -4,7 +4,7 @@ library(shinycssloaders)
 # Define UI for application that plots random distributions 
 shinyUI(fluidPage(
   
-  titlePanel("PKPD Optimization"),
+  titlePanel("BNAb PKPD Optimization"),
   fluidRow(align = "center",
           sliderInput("ratio", "ratio: mAbA / total dose", 
                       min = 0, max = 1, step = 0.05, value = .5),#),
@@ -14,17 +14,17 @@ shinyUI(fluidPage(
   tabPanel("PK",
          sidebarLayout(
            sidebarPanel(
-             numericInput("dose", "total dose (mg) (ex., 30 mg/kg x 70 kg = 2100 mg)", value = 300, min = 100, max = 3000, step = 50),
-             numericInput("finaltime", "time (days)", min = 0, value = 75),
+             numericInput("dose", "Total dose (mg) (ex., 30 mg/kg x 70 kg = 2100 mg)", value = 300, min = 100, max = 3000, step = 50),
+             numericInput("finaltime", "Time (days)", min = 0, value = 75),
              sliderInput("hlA", "mAb A HL (days):", min = 5, max = 100, step = 5, value = 30),
              sliderInput("hlB", "mAb B HL (days):", min = 5, max = 100, step = 5, value = 15),
-             fluidRow(column(10, strong("distribution volume (L)")), align = "center",
+             fluidRow(column(10, strong("Distribution volume (L)")), align = "center",
                       fluidRow(
                         column(5, numericInput("VA", p(HTML(paste0("V",tags$sub("A")))), min = 0, max = 20, value = 3, step = 0.25)),
                         column(5, numericInput("VB", p(HTML(paste0("V",tags$sub("B")))), min = 0, max = 20, value = 3, step = 0.25))
                       )),
              hr(style = "border-top: 1px solid #000000;"),
-             fluidRow(column(10, strong("absorption model (ex., SC/IM admin)")), align = "center",
+             fluidRow(column(10, strong("Absorption model (ex., SC/IM admin)")), align = "center",
                       fluidRow(
                         column(5, checkboxInput("SC_A", "mAb A", value = FALSE)),
                         column(5, checkboxInput("SC_B", "mAb B", value = FALSE)),
@@ -36,7 +36,7 @@ shinyUI(fluidPage(
                                                value = 0.7, step = 0.025))
                       )),
              hr(style = "border-top: 1px solid #000000;"),
-             fluidRow(column(10, strong("two-compartment model")), align = "center",
+             fluidRow(column(10, strong("Two-compartment model")), align = "center",
                       fluidRow(
                         column(5, checkboxInput("A_twocmpt", "mAb A", value = FALSE)),
                         column(5, checkboxInput("B_twocmpt", "mAb B", value = FALSE)),
@@ -61,25 +61,30 @@ shinyUI(fluidPage(
   tabPanel("PD",
            sidebarLayout(
              sidebarPanel( 
-               sliderInput("sim_n", "simulated viruses", min = 50, max = 1000, step = 50, value = 250),
+               sliderInput("sim_n", "Simulated viruses", min = 50, max = 1000, step = 50, value = 250),
                fluidRow(column(10, strong("mAb A log10(IC50)")), align = "center",
                  fluidRow(
-                 column(5, numericInput("muA", "mean", min = -5, max = 2, value = -1, step = 0.25)),
-                 column(5, numericInput("sdA", "sd", min = 0, max = 3, value = 2, step = 0.25))
+                 column(5, numericInput("muA", "mean", min = -4, max = 2, value = 0.5, step = 0.25)),
+                 column(5, numericInput("sdA", "sd", min = 0, max = 2, value = 0.4, step = 0.25))
                )), 
-               sliderInput("phiA","% viral resistance", min = 0, max = 1, step = 0.1, value = 0.4),
+               sliderInput("phiA","% viral resistance", min = 0, max = 1, step = 0.1, value = 0.5),
                fluidRow(column(10, strong("mAb B log10(IC50)")), align = "center",
                         fluidRow(
-                          column(5, numericInput("muB", "mean", min = -5, max = 2, value = -3, step = 0.25)),
-                          column(5, numericInput("sdB", "sd", min = 0, max = 3, value = 1, step = 0.25))
+                          column(5, numericInput("muB", "mean", min = -4, max = 2, value = -2, step = 0.25)),
+                          column(5, numericInput("sdB", "sd", min = 0, max = 2, value = 0.5, step = 0.25))
                         )),               
                sliderInput("phiB", "% viral resistance", min = 0, max = 1, step = 0.1, value = 0.1),
                numericInput("seed", "sim seed", min = 1, value = sample(1e5, 1))
              ),
              mainPanel(
                tabsetPanel(
-                 tabPanel("Marginal PD", plotOutput("margPDplot")),
-                 tabPanel("Combined PD", plotOutput("PDplot", width = "auto"))
+                 tabPanel("Marginal PD", plotOutput("margPDplot", width = "600", height="500")),
+                 tabPanel("Combined PD", plotOutput("PDplot", width = "auto")),
+                 tabPanel("Example PD input", 
+                          h6("IC50 denotes the estimated concentration that achieves 50% in vitro neutralization. These are simple approximations to illustrate the range of these values. Parameters may differ from references as the geometric means here are defined by the average IC50 among sensitive viruses."),
+                          tableOutput("pd_ex_tab"),
+                          tags$a(href="https://www.hiv.lanl.gov/components/sequence/HIV/neutralization/", "See CATNAP website", target="_blank")
+                          )
                )
              ))
   ),
@@ -89,17 +94,24 @@ shinyUI(fluidPage(
              checkboxGroupInput("interaction", "mAb interaction model", 
                                 choiceNames = c("Bliss-Hill", "Additive", "Maximum", "Minimum"), 
                                 choiceValues = c("BH", "additivity", "maxNeut", "minNeut"),
-                                selected = c("BH", "additivity", "maxNeut", "minNeut")),
+                                selected = c("BH", "additivity", "minNeut")),
              selectInput("endpoint", "Endpoint", 
                          choices = c("IIP" = "IIP",
                                      "Neutralization" = "neut"),
                          selected = "iip"),
+             actionButton("run_optim", "Run ratio optimization"),
              checkboxInput("threshout", "IIP threshold coverage"),
              conditionalPanel(
                condition = "input.threshout == true",
-               numericInput("threshold", "IIP Threshold", value = 3, min = 0, step = 0.25)
-             ),
-             actionButton("run_optim", "Run ratio optimization")
+               numericInput("threshold", "IIP Threshold", value = 2, min = 0.3, step = 0.25),
+               fluidRow(column(10, strong("Calculate IIP threshold from neutralization titer")), align = "center",
+                        fluidRow(
+                          column(5, numericInput("ID50", "ID50 titer threshold", value = 100, min = 1, step = 10)),
+                          column(5, numericInput("hill", "Hill slope", value = 1, min = 0.3, max = 3, step = 0.05)),
+                          tableOutput("titer_iip"),
+                          align = "left"
+                        ))
+             )
            ),
            mainPanel(
              tabsetPanel(
