@@ -5,16 +5,20 @@ library(shinycssloaders)
 shinyUI(fluidPage(
   
   titlePanel("BNAb PKPD Optimization"),
-  fluidRow(align = "center",
-          sliderInput("ratio", "ratio: mAbA / total dose", 
-                      min = 0, max = 1, step = 0.05, value = .5),#),
-           textOutput("ratio_print")
-  ),
+  fluidRow(column(12), 
+           fluidRow(align = "center",
+             column(6, numericInput("dose", "Total dose (mg)", 
+                                    value = 600, min = 100, max = 3000, step = 50, width = "20%"), 
+                    p("ex., 30 mg/kg x 70 kg = 2100 mg"),
+                    align = "right"),
+             column(6, sliderInput("ratio", "Ratio: mAb A / total dose", 
+                                   min = 0, max = 1, step = 0.05, value = .5), 
+                    textOutput("ratio_print"), align = "left")
+           )),
   tabsetPanel(
   tabPanel("PK",
          sidebarLayout(
            sidebarPanel(
-             numericInput("dose", "Total dose (mg) (ex., 30 mg/kg x 70 kg = 2100 mg)", value = 300, min = 100, max = 3000, step = 50),
              numericInput("finaltime", "Time (days)", min = 0, value = 75),
              sliderInput("hlA", "mAb A HL (days):", min = 5, max = 100, step = 5, value = 30),
              sliderInput("hlB", "mAb B HL (days):", min = 5, max = 100, step = 5, value = 15),
