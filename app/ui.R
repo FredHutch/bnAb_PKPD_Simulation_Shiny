@@ -67,17 +67,17 @@ shinyUI(fluidPage(
                sliderInput("sim_n", "Simulated viruses", min = 50, max = 1000, step = 50, value = 250),
                fluidRow(column(10, strong("mAb A log10(IC50)")), align = "center",
                  fluidRow(
-                 column(5, numericInput("muA", "mean", min = -4, max = 2, value = 0.5, step = 0.25)),
-                 column(5, numericInput("sdA", "sd", min = 0, max = 2, value = 0.4, step = 0.25))
+                 column(5, numericInput("muA", "Mean", min = -4, max = 2, value = 0.5, step = 0.25)),
+                 column(5, numericInput("sdA", "Std. Dev.", min = 0, max = 2, value = 0.4, step = 0.25))
                )), 
-               sliderInput("phiA","% viral resistance", min = 0, max = 1, step = 0.1, value = 0.5),
+               sliderInput("phiA","Viral resistance probability", min = 0, max = 1, step = 0.1, value = 0.5),
                fluidRow(column(10, strong("mAb B log10(IC50)")), align = "center",
                         fluidRow(
-                          column(5, numericInput("muB", "mean", min = -4, max = 2, value = -2, step = 0.25)),
-                          column(5, numericInput("sdB", "sd", min = 0, max = 2, value = 0.5, step = 0.25))
+                          column(5, numericInput("muB", "Mean", min = -4, max = 2, value = -2, step = 0.25)),
+                          column(5, numericInput("sdB", "Std. Dev.", min = 0, max = 2, value = 0.5, step = 0.25))
                         )),               
-               sliderInput("phiB", "% viral resistance", min = 0, max = 1, step = 0.1, value = 0.1),
-               numericInput("seed", "sim seed", min = 1, value = sample(1e5, 1))
+               sliderInput("phiB", "Viral resistance probability", min = 0, max = 1, step = 0.1, value = 0.1),
+               numericInput("seed", "Simulation seed", min = 1, value = sample(1e5, 1))
              ),
              mainPanel(
                tabsetPanel(
