@@ -28,7 +28,7 @@ shinyUI(fluidPage(
                         column(5, numericInput("VB", p(HTML(paste0("V",tags$sub("B")))), min = 0, max = 20, value = 3, step = 0.25))
                       )),
              hr(style = "border-top: 1px solid #000000;"),
-             fluidRow(column(10, strong("Absorption model (ex., SC/IM admin)")), align = "center",
+             fluidRow(column(10, strong("Absorption model (ie, SC/IM admin)")), align = "center",
                       fluidRow(
                         column(5, checkboxInput("SC_A", "mAb A", value = FALSE)),
                         column(5, checkboxInput("SC_B", "mAb B", value = FALSE)),

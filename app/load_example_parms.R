@@ -39,7 +39,9 @@ pk_ex_tab = structure(
 )
 pk_ex_tab = pk_ex_tab %>%
   mutate_all(as.character) %>%
-  replace(is.na(.), "")
+  replace(is.na(.), "") %>%
+  as_tibble() %>%
+  rename(`Elim. HL (days)` = Elim..HL..days.)
 
 pd_ex_tab = structure(
   list(
@@ -121,4 +123,10 @@ pd_ex_tab = structure(
 )
 
 pd_ex_tab = pd_ex_tab %>%
-  mutate_all(as.character)
+  as_tibble() %>%
+  mutate_all(as.character) %>%
+  rename(
+    `Mean log10 IC50` = Mean.log10.IC50,
+    `Std. Dev. log10 IC50` = Std..Dev..log10.IC50,
+    `% resistant` = Resistant..pct.
+  )
