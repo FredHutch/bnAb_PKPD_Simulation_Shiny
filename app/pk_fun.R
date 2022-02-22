@@ -1,3 +1,33 @@
+# --------- call pk -----------
+
+make_pk_dat = function(mtime, dose, input, mAb, Cl){
+  if(mAb == "A"){
+    if(input$twocmpt_on) {
+      return(two_cmpt_pk(mtime, dose = dose, 
+                  V =  input$VA, Cl = Cl, Q = input$QA, Vp = input$VpA,
+                  SC = input$SC_A, ka = input$kaA, Fbio = input$FbioA))
+    } else{
+      return(one_cmpt_pk(mtime, dose = dose, input$VA, input$hlA,
+                  SC = input$SC_A, ka = input$kaA, Fbio = input$FbioA))
+    }
+  }
+  
+  if(mAb == "B"){
+    if(input$twocmpt_on) {
+      return(two_cmpt_pk(mtime, dose = dose, 
+                  V =  input$VB, Cl =  Cl, Q = input$QB, Vp = input$VpB,
+                  SC = input$SC_B, ka = input$kaB, Fbio = input$FbioB))
+    } else{
+      return(one_cmpt_pk(mtime, dose = dose, input$VB, input$hlB,
+                  SC = input$SC_B, ka = input$kaB, Fbio = input$FbioB))
+    }
+  }
+  
+}
+
+
+# -------- one-cmpt model --------
+
 one_cmpt_pk = function(mtime, dose, V, hl, SC = F, ka, Fbio = 1){
   rate = log(0.5)/hl
   if(SC){

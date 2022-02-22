@@ -38,8 +38,7 @@ shinyUI(fluidPage(
              hr(style = "border-top: 1px solid #000000;"),
              fluidRow(column(10, strong("Two-compartment model")), align = "center",
                       fluidRow(
-                        column(5, checkboxInput("A_twocmpt", "mAb A", value = FALSE)),
-                        column(5, checkboxInput("B_twocmpt", "mAb B", value = FALSE)),
+                        column(10, checkboxInput("twocmpt_on", "Use two-compartment kinetics", value = FALSE)),
                         column(5, numericInput("QA", p(HTML(paste0("Q",tags$sub("A")))), min = 0.01, value = 0.75, step = 0.025)),
                         column(5, numericInput("QB", p(HTML(paste0("Q",tags$sub("B")))), min = 0.01, value = 0.75, step = 0.025)),
                         column(5, numericInput("VpA", p(HTML(paste0("Vp",tags$sub("A")))), min = 0.01, max = 20, 
@@ -98,7 +97,7 @@ shinyUI(fluidPage(
              selectInput("endpoint", "Endpoint", 
                          choices = c("IIP" = "IIP",
                                      "Neutralization" = "neut"),
-                         selected = "iip"),
+                         selected = "IIP"),
              actionButton("run_optim", "Run ratio optimization"),
              checkboxInput("threshout", "IIP threshold coverage"),
              conditionalPanel(

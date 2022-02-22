@@ -35,24 +35,30 @@ shinyServer(function(input, output) {
               })
               
               ClA = reactive({
-                if(input$A_twocmpt) calc_CL(V = input$VA, Q = input$QA, 
+                if(input$twocmpt_on) calc_CL(V = input$VA, Q = input$QA, 
                                             Vp = input$VpA, hl = input$hlA) else input$VA*log(2)/input$hlA
               })
               ClB = reactive({
-                if(input$B_twocmpt) calc_CL(V = input$VB, Q = input$QB, 
+                if(input$twocmpt_on) calc_CL(V = input$VB, Q = input$QB, 
                                             Vp = input$VpB, hl = input$hlB) else input$VB*log(2)/input$hlB
               })
               
               output$ratio_print = renderText({ratio_txt()})
               output$titer_iip = renderTable({tibble(`Predicted ID80` = input$ID50 * 4^(1/input$hill), 
-                                                     `IIP Threshold`= -log10(1 - titer2neut(input$ID50, 
-                                                                                            hill = input$hill)))})
+                                                     `% neut.` = if_else(
+                                                       titer2neut(input$ID50, hill = input$hill)>0.9999,
+                                                       ">99.99",
+                                                       as.character(round(100*titer2neut(input$ID50, hill = input$hill), 2))
+                                                       ),
+                                                     `IIP threshold`= -log10(1 - titer2neut(input$ID50, 
+                                                                                            hill = input$hill)))
+                })
               
               output$pk_tab = renderTable({
-                 QA = if(input$A_twocmpt) input$QA else NA
-                 VpA = if(input$A_twocmpt) input$VpA else NA
-                 QB = if(input$B_twocmpt) input$QB else NA
-                 VpB = if(input$B_twocmpt) input$VpB else NA                
+                 QA = if(input$twocmpt_on) input$QA else NA
+                 VpA = if(input$twocmpt_on) input$VpA else NA
+                 QB = if(input$twocmpt_on) input$QB else NA
+                 VpB = if(input$twocmpt_on) input$VpB else NA                
                  kaA = if(input$SC_A)  input$kaA else NA
                  FbioA = if(input$SC_A)  input$FbioA else NA
                  kaB = if(input$SC_B)  input$kaB else NA
@@ -79,22 +85,10 @@ shinyServer(function(input, output) {
               PKDat = reactive({
                 tibble(
                   days = mtime(),
-                  mAbA = if(input$A_twocmpt) {
-                      two_cmpt_pk(mtime(), input$dose * input$ratio, 
-                                V =  input$VA, Cl =  ClA(), Q = input$QA, Vp = input$VpA,
-                                SC = input$SC_A, ka = input$kaA, Fbio = input$FbioA)
-                    } else{
-                      one_cmpt_pk(mtime(), input$dose * input$ratio, input$VA, input$hlA,
-                                     SC = input$SC_A, ka = input$kaA, Fbio = input$FbioA)
-                      },
-                  mAbB = if(input$B_twocmpt) {
-                    two_cmpt_pk(mtime(), input$dose * (1 - input$ratio), 
-                                V =  input$VB, Cl =  ClB(), Q = input$QB, Vp = input$VpB,
-                                SC = input$SC_B, ka = input$kaB, Fbio = input$FbioB)
-                    } else{
-                    one_cmpt_pk(mtime(), input$dose * (1 - input$ratio), input$VB, input$hlB,
-                                     SC = input$SC_B, ka = input$kaB, Fbio = input$FbioB)
-                  }
+                  mAbA = make_pk_dat(mtime = mtime(), dose = input$dose * input$ratio,
+                                     input = input, mAb = "A", Cl = ClA()),
+                  mAbB = make_pk_dat(mtime = mtime(), dose = input$dose * (1 - input$ratio),
+                                     input = input, mAb = "B", Cl = ClB())
                 )
               })
 
@@ -123,9 +117,10 @@ shinyServer(function(input, output) {
                 map_df(seq(0, 1, by = 0.05), function(i) {
                   pk_dat = tibble(
                     days = mtime(),
-                    mAbA = one_cmpt_pk(mtime(), input$dose * i, input$VA, input$hlA),
-                    mAbB = one_cmpt_pk(mtime(), input$dose * (1 - i), input$VB, input$hlB
-                    )
+                    mAbA = make_pk_dat(mtime = mtime(), dose = input$dose * i,
+                                       input = input, mAb = "A", Cl = ClA()),
+                    mAbB = make_pk_dat(mtime = mtime(), dose = input$dose * (1 - i),
+                                       input = input, mAb = "B", Cl = ClB())
                   )
 
                   make_pkpd_dat(pk_dat, PDdat_react(), endpoint_set = input$endpoint,
@@ -181,7 +176,7 @@ shinyServer(function(input, output) {
 
               output$PKPDpl  <- renderPlot({
                 if(unique(PKPDdat()$summary) == "mean") ylab = paste("mean", input$endpoint)
-                if(unique(PKPDdat()$summary) == "coverage") ylab = paste(input$endpoint, ">", input$threshold,
+                if(unique(PKPDdat()$summary) == "coverage") ylab = paste("IIP", ">", input$threshold,
                                                                          "(% viruses)")
 
                 PKPDdat() %>%
@@ -199,7 +194,7 @@ shinyServer(function(input, output) {
 
               ylab_opt = eventReactive(input$run_optim, {
                 if(unique(optRatio()$summary) == "mean") x = paste("mean", input$endpoint)
-                if(unique(optRatio()$summary) == "coverage") x = paste(input$endpoint, ">", input$threshold,
+                if(unique(optRatio()$summary) == "coverage") x = paste("IIP", ">", input$threshold,
                                                                        "(% viruses)")
                 x
               })

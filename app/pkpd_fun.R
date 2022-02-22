@@ -15,6 +15,7 @@ simple_IIP_interactions = function(dat) {
 }
 
 make_pkpd_dat = function(pkdat, pddat, endpoint_set, interaction_set, thresh = -1, return_summary = F) {
+  if(thresh >= 0) endpoint_set = "IIP"
   pkpd_out = pkdat %>%
     group_by(days) %>%
     nest() %>%
