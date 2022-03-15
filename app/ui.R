@@ -124,7 +124,14 @@ shinyUI(fluidPage(
                                                       size = 2.5))
              )                             
            ))
-  )
+  ),
+  tabPanel("About", 
+           h4("Author: Bryan Mayer (bmayer@fredhutch.org)"),
+           div("Code:", a("https://github.com/FredHutch/bnAb_PKPD_Simulation_Shiny")),
+           h4("This application accompanies the following paper:"),
+           h6("Bryan T. Mayer, Allan C. deCamp, Yunda Huang, Joshua T. Schiffer, Raphael Gottardo, Peter B. Gilbert, Daniel B. Reeves.
+Optimizing clinical dosing of combination broadly neutralizing antibodies for HIV prevention. Plos Comp Bio. Accepted. 2022.")
+  ) 
   )
 )
 )
