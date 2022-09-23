@@ -130,7 +130,8 @@ shinyUI(fluidPage(
            div("Code:", a("https://github.com/FredHutch/bnAb_PKPD_Simulation_Shiny")),
            h4("This application accompanies the following paper:"),
            h6("Bryan T. Mayer, Allan C. deCamp, Yunda Huang, Joshua T. Schiffer, Raphael Gottardo, Peter B. Gilbert, Daniel B. Reeves.
-Optimizing clinical dosing of combination broadly neutralizing antibodies for HIV prevention. Plos Comp Bio. Accepted. 2022.")
+Optimizing clinical dosing of combination broadly neutralizing antibodies for HIV prevention. PLoS Comput Biol. Apr 6;18(4):e1010003. 2022. PMID: 35385469; PMCID: PMC9084525."),
+           div("Paper link:", a("https://journals.plos.org/ploscompbiol/article?id=10.1371/journal.pcbi.1010003"))
   ) 
   )
 )
