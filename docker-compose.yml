@@ -14,3 +14,7 @@ services:
         - "traefik.http.routers.bnabpkpd.tls=true"
       restart_policy:
         condition: on-failure
+
+networks:
+  proxy:
+    external: true
