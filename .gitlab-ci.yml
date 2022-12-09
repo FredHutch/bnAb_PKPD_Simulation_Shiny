@@ -26,7 +26,6 @@ test:
       alias: bnabpkpd
   script:
     - sleep 15 && curl -sI  http://bnabpkpd:3838  |head -1|grep -q "200 OK"
-    - docker stop bnabpkpd && docker rm --force bnabpkpd
   
   
 deploy:
