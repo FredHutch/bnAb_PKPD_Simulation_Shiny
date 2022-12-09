@@ -1,9 +1,16 @@
-version: '2'
+version: '3.3'
 services:
   bnabpkpd:
+    networks:
+      - proxy
     image: dockerimages.fhcrc.org/bnabpkpd:latest
-
-    labels:
-      io.rancher.container.pull_image: always
-
-    restart: always
+    deploy:
+      labels:
+        - "traefik.enable=true"
+        - "traefik.http.routers.bnabpkpd.rule=Host(`bnabpkpd0.fredhutch.org`)"
+        - "traefik.http.routers.bnabpkpd-secured.rule=Host(`bnabpkpd0.fredhutch.org`)"
+        - "traefik.http.routers.bnabpkpd.entrypoints=web,web-secured"
+        - "traefik.http.services.bnabpkpd.loadbalancer.server.port=3838" # it seems you always need to give traefik a port so it 'notices' the service
+        - "traefik.http.routers.bnabpkpd.tls=true"
+      restart_policy:
+        condition: on-failure
