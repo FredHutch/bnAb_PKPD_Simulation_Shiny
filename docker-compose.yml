@@ -3,7 +3,7 @@ services:
   bnabpkpd:
     networks:
       - proxy
-    image: dockerimages.fhcrc.org/bnabpkpd:latest
+    image: sc-registry.fredhutch.org/bnabpkpd:latest
     deploy:
       labels:
         - "traefik.enable=true"

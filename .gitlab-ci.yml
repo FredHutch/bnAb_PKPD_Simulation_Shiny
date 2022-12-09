@@ -25,7 +25,7 @@ test:
     - name: sc-registry.fredhutch.org/bnabpkpd:test
       alias: bnabpkpd
   script:
-    - docker run -d --name bnabpkpd -p 8888:8888 dockerimages.fhcrc.org/bnabpkpd:latest
+    - docker run -d --name bnabpkpd -p 8888:8888 sc-registry.fredhutch.org/bnabpkpd:latest
     - sleep 15 && curl -u "${TESTUSER}:${TESTPASS}" -sI  http://localhost:8888  |head -1|grep -q "200 OK"
     - docker stop bnabpkpd && docker rm --force bnabpkpd
   
