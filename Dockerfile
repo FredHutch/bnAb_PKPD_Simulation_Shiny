@@ -10,4 +10,4 @@ ADD ./app/*.R /srv/shiny-server/
 RUN R -e "install.packages(c('pracma', 'shinycssloaders'), repos = 'http://cran.us.r-project.org')"
 
 WORKDIR /srv/shiny-server/
-CMD /usr/bin/shiny-server.sh
+CMD /usr/bin/shiny-server
